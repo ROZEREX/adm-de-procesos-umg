@@ -60,13 +60,15 @@ sudo dotnet run
 
 ## Ejecución en Windows
 
-1. Desde terminal (PowerShell o CMD):
+1. **Método rápido (un solo clic):**
+   - Haz doble clic en el archivo `Ejecutar.bat` ubicado en la raíz del proyecto.
+2. **Desde la terminal (PowerShell o CMD):**
    ```powershell
    cd ProcesosManager
    dotnet run
    ```
-2. O abrir `ProcesosManager.slnx` en Visual Studio y presionar **F5**.
-3. O ejecutar directamente el binario compilado en `ProcesosManager/bin/Debug/net10.0/ProcesosManager.exe`.
+3. **Desde Visual Studio:**
+   - Abre `ProcesosManager.slnx` en Visual Studio y presiona **F5**.
 
 ## Estructura
 
