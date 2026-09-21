@@ -1,0 +1,17 @@
+## Archivos y carpetas de compilación de .NET
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Archivos de bloqueo y temporales
+*.tmp
+*.log
