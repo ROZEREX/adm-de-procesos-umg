@@ -83,9 +83,16 @@ namespace ProcesosManager
 
         private static void EjecutarGestionarProcesos()
         {
-            // Integrante 3: GestionarProcesos.cs (Matar / Iniciar)
-            Console.WriteLine("\n[Módulo: Gestionar Procesos - Integrante 3 en desarrollo]");
-            Pausar();
+            try
+            {
+                // Integrante 3: GestionarProcesos.cs (Matar / Iniciar)
+                GestionarProcesos.Gestionar();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nError al gestionar procesos: {ex.Message}");
+                Pausar();
+            }
         }
 
         private static void EjecutarMonitorMetricas()
