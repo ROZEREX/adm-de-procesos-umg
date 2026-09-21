@@ -13,7 +13,7 @@ Proyecto del curso — Tarea 11.4.2 *Software Administración de Procesos*, Univ
 | 4 | Jaime Reyes | [jaimereyes1705-ux](https://github.com/jaimereyes1705-ux) | Monitor de métricas (CPU / memoria) | `MonitorMtricas.cs` |
 | 5 | Sebastian Chavarria | [SebastianCH22](https://github.com/SebastianCH22) | Exportar logs (historial / archivo) y manual de usuario | `ExportarLogs.cs` |
 
-Cada archivo `.cs` indica en su encabezado el integrante responsable. La autoría también se puede verificar en el historial de commits.
+La autoría y aportes de cada integrante se pueden verificar en la tabla anterior y en el historial de commits de Git.
 
 ## Funciones
 
@@ -25,19 +25,48 @@ Cada archivo `.cs` indica en su encabezado el integrante responsable. La autorí
 
 ## Requisitos
 
-- Linux (probado) o Windows 10/11
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Recomendado: ejecutar como Administrador para ver y finalizar procesos del sistema.
+- **Linux** (Ubuntu, Debian, Fedora, WSL2 o cualquier distribución compatible) o **Windows 10/11**
+- [.NET SDK](https://dotnet.microsoft.com/download) (.NET 10 o .NET 8 LTS)
+- **Permisos de administrador / root (`sudo`)**: recomendado en Linux para poder consultar métricas y finalizar procesos de otros usuarios o del sistema.
 
-## Ejecución
+## Ejecución en Linux
 
+### 1. Instalar .NET SDK en Linux (Ubuntu / Debian / WSL)
 ```bash
-git clone https://github.com/ROZEREX/adm-de-procesos-umg.git
-cd adm-de-procesos-umg/ProcesosManager
-dotnet run
+sudo apt update
+sudo apt install -y dotnet-sdk-8.0
+# O si tu distribución tiene disponible .NET 10:
+# sudo apt install -y dotnet-sdk-10.0
 ```
 
-O abrir `ProcesosManager.slnx` en Visual Studio y presionar **F5**.
+### 2. Clonar o acceder al proyecto
+```bash
+# Si descargas el repositorio:
+git clone https://github.com/ROZEREX/adm-de-procesos-umg.git
+cd adm-de-procesos-umg/ProcesosManager
+
+# Si usas WSL (Ubuntu en Windows) y los archivos están en C:\:
+# cd /mnt/c/MAMP/htdocs/procesos-umg/ProcesosManager
+```
+
+### 3. Compilar y ejecutar
+```bash
+dotnet build
+dotnet run
+
+# O con permisos de superusuario para gestionar procesos del sistema:
+sudo dotnet run
+```
+
+## Ejecución en Windows
+
+1. Desde terminal (PowerShell o CMD):
+   ```powershell
+   cd ProcesosManager
+   dotnet run
+   ```
+2. O abrir `ProcesosManager.slnx` en Visual Studio y presionar **F5**.
+3. O ejecutar directamente el binario compilado en `ProcesosManager/bin/Debug/net10.0/ProcesosManager.exe`.
 
 ## Estructura
 
