@@ -59,6 +59,7 @@ namespace ProcesoManager
             try
             {
                 Process.Start(nombre);
+                ProcesosManager.ExportarLogs.Registrar("Proceso iniciado", nombre);
 
                 Console.WriteLine();
                 Console.WriteLine("Proceso iniciado correctamente.");
@@ -96,7 +97,9 @@ namespace ProcesoManager
 
                     if (respuesta.ToUpper() == "S")
                     {
+                        string nombreProceso = proceso.ProcessName;
                         proceso.Kill();
+                        ProcesosManager.ExportarLogs.Registrar("Proceso finalizado", $"{nombreProceso} (PID {pid})");
 
                         Console.WriteLine();
                         Console.WriteLine("Proceso finalizado correctamente.");

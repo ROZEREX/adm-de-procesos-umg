@@ -15,3 +15,6 @@
 ## Archivos de bloqueo y temporales
 *.tmp
 *.log
+
+## Documentos de entrega (no forman parte del código)
+Entrega/

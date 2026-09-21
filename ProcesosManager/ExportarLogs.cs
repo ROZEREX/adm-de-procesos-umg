@@ -4,9 +4,6 @@ using System.IO;
 
 namespace ProcesosManager
 {
-    /// <summary>
-    /// Representa una acción realizada dentro del administrador de procesos.
-    /// </summary>
     public class RegistroLog
     {
         public DateTime FechaHora { get; set; }
@@ -26,24 +23,15 @@ namespace ProcesosManager
         }
     }
 
-    /// <summary>
-    /// Integrante 5: Historial y exportación de registros.
-    /// </summary>
     public static class ExportarLogs
     {
         private static readonly List<RegistroLog> historial = new List<RegistroLog>();
 
-        /// <summary>
-        /// Registra una acción realizada sobre un proceso.
-        /// </summary>
         public static void Registrar(string accion, string proceso)
         {
             historial.Add(new RegistroLog(accion, proceso));
         }
 
-        /// <summary>
-        /// Menú principal del módulo de Exportar Logs.
-        /// </summary>
         public static void Gestionar()
         {
             bool salir = false;
@@ -93,9 +81,6 @@ namespace ProcesosManager
             }
         }
 
-        /// <summary>
-        /// Muestra todos los registros almacenados.
-        /// </summary>
         public static void MostrarHistorial()
         {
             Console.Clear();
@@ -120,9 +105,6 @@ namespace ProcesosManager
             Console.WriteLine($"Total de registros: {historial.Count}");
         }
 
-        /// <summary>
-        /// Exporta el historial a un archivo de texto.
-        /// </summary>
         public static void ExportarArchivo()
         {
             string nombreArchivo = "historial_procesos.txt";
@@ -170,9 +152,6 @@ namespace ProcesosManager
             }
         }
 
-        /// <summary>
-        /// Elimina todos los registros almacenados.
-        /// </summary>
         public static void LimpiarHistorial()
         {
             historial.Clear();
@@ -181,17 +160,11 @@ namespace ProcesosManager
             Console.WriteLine("Historial limpiado correctamente.");
         }
 
-        /// <summary>
-        /// Devuelve una copia del historial actual.
-        /// </summary>
         public static List<RegistroLog> ObtenerHistorial()
         {
             return new List<RegistroLog>(historial);
         }
 
-        /// <summary>
-        /// Pausa la ejecución hasta que el usuario presione una tecla.
-        /// </summary>
         private static void Pausar()
         {
             Console.WriteLine();

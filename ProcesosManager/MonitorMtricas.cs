@@ -6,19 +6,11 @@ using System.Threading;
 
 namespace ProcesosManager
 {
-    /// <summary>
-    /// Integrante 4: Monitor de Métricas.
-    /// Responsable de mostrar el consumo de CPU y memoria de los procesos del sistema.
-    /// </summary>
     public class MonitorMetricas
     {
         // Número de núcleos lógicos del equipo, necesario para calcular el % de CPU real.
         private static readonly int NucleosCPU = Environment.ProcessorCount;
 
-        /// <summary>
-        /// Punto de entrada del módulo. Program.cs (Integrante 1) llama a este método
-        /// desde el menú principal, por ejemplo en la opción "Monitor de métricas".
-        /// </summary>
         public static void MostrarMenu()
         {
             bool salir = false;
@@ -58,10 +50,6 @@ namespace ProcesosManager
             }
         }
 
-        /// <summary>
-        /// Muestra una tabla estática (una sola lectura) con PID, Nombre, % CPU y Memoria (MB)
-        /// de todos los procesos del sistema, ordenados por consumo de memoria.
-        /// </summary>
         public static void MostrarTablaMetricas()
         {
             Console.Clear();
@@ -80,10 +68,6 @@ namespace ProcesosManager
             Console.WriteLine($"\nTotal de procesos: {metricas.Count}");
         }
 
-        /// <summary>
-        /// Refresca la tabla de métricas cada cierto intervalo hasta que el usuario presione una tecla.
-        /// Similar a un mini "top" / Administrador de tareas.
-        /// </summary>
         public static void MonitorearEnTiempoReal()
         {
             Console.Clear();
@@ -110,9 +94,6 @@ namespace ProcesosManager
             Console.ReadKey(true); // consume la tecla que detuvo el bucle
         }
 
-        /// <summary>
-        /// Pide un PID por consola y muestra su consumo de CPU/Memoria de forma puntual.
-        /// </summary>
         public static void MonitorearProcesoPorPid()
         {
             Console.Clear();
@@ -149,10 +130,6 @@ namespace ProcesosManager
             Pausar();
         }
 
-        /// <summary>
-        /// Calcula el porcentaje de uso de CPU de un proceso midiendo el tiempo de CPU
-        /// consumido entre dos instantes separados por 'intervaloMs' milisegundos.
-        /// </summary>
         public static double ObtenerUsoCPU(Process proceso, int intervaloMs = 500)
         {
             try
@@ -181,11 +158,6 @@ namespace ProcesosManager
             }
         }
 
-        /// <summary>
-        /// Recorre todos los procesos del sistema y calcula su % de CPU y memoria en MB.
-        /// Pensado para ser reutilizado por ExportarLogs.cs (Integrante 5) si necesita
-        /// guardar un snapshot de métricas en el historial.
-        /// </summary>
         public static List<MetricaProceso> ObtenerMetricasDeTodosLosProcesos(int intervaloMs = 500)
         {
             Process[] procesos = Process.GetProcesses();
@@ -251,10 +223,6 @@ namespace ProcesosManager
         }
     }
 
-    /// <summary>
-    /// Representa una métrica puntual de un proceso. Se expone públicamente para que
-    /// otros módulos (por ejemplo ExportarLogs.cs) puedan reutilizar estos datos.
-    /// </summary>
     public class MetricaProceso
     {
         public int Pid { get; set; }

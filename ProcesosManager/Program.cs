@@ -3,9 +3,6 @@ using ProcesoManager;
 
 namespace ProcesosManager
 {
-    /// <summary>
-    /// Integrante 1: Setup inicial + Menú principal (Program.cs)
-    /// </summary>
     internal class Program
     {
         static void Main(string[] args)
@@ -42,12 +39,14 @@ namespace ProcesosManager
                 switch (opcion)
                 {
                     case "1":
+                        ExportarLogs.Registrar("Consulta de lista de procesos", "-");
                         EjecutarListarProcesos();
                         break;
                     case "2":
                         EjecutarGestionarProcesos();
                         break;
                     case "3":
+                        ExportarLogs.Registrar("Consulta de monitor de métricas", "-");
                         EjecutarMonitorMetricas();
                         break;
                     case "4":
@@ -111,9 +110,16 @@ namespace ProcesosManager
 
         private static void EjecutarExportarLogs()
         {
-            // Integrante 5: ExportarLogs.cs (Historial / Exportar a archivo)
-            Console.WriteLine("\n[Módulo: Exportar Logs - Integrante 5 en desarrollo]");
-            Pausar();
+            try
+            {
+                // Integrante 5: ExportarLogs.cs (Historial / Exportar a archivo)
+                ExportarLogs.Gestionar();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nError al exportar logs: {ex.Message}");
+                Pausar();
+            }
         }
 
         private static void SafeClear()
