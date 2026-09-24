@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 
 namespace ProcesosManager
 {
@@ -25,7 +28,17 @@ namespace ProcesosManager
 
     public static class ExportarLogs
     {
+        private const string NombreArchivo = "historial_procesos.json";
+
         private static readonly List<RegistroLog> historial = new List<RegistroLog>();
+
+        private static readonly JsonSerializerOptions opcionesJson = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            // Mantiene tildes y ñ legibles en el archivo en lugar de é, etc.
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
 
         public static void Registrar(string accion, string proceso)
         {
@@ -38,44 +51,40 @@ namespace ProcesosManager
 
             while (!salir)
             {
-                Console.Clear();
+                Ui.Titulo("Historial y exportación", $"{historial.Count} registros en memoria");
+                Ui.Opcion("1", "Mostrar historial");
+                Ui.Opcion("2", "Exportar historial", NombreArchivo);
+                Ui.Opcion("3", "Limpiar historial");
+                Console.WriteLine();
+                Ui.Opcion("0", "Volver al menú principal");
 
-                Console.WriteLine("==================================================");
-                Console.WriteLine("              EXPORTAR LOGS");
-                Console.WriteLine("==================================================");
-                Console.WriteLine(" 1. Mostrar historial");
-                Console.WriteLine(" 2. Exportar historial a archivo");
-                Console.WriteLine(" 3. Limpiar historial");
-                Console.WriteLine(" 4. Volver al menú principal");
-                Console.WriteLine("──────────────────────────────────────────────────");
-                Console.Write(" Seleccione una opción: ");
-
-                string? opcion = Console.ReadLine()?.Trim();
+                string? opcion = Ui.Pedir("Seleccione una opción");
 
                 switch (opcion)
                 {
                     case "1":
                         MostrarHistorial();
-                        Pausar();
+                        Ui.Pausar();
                         break;
 
                     case "2":
                         ExportarArchivo();
-                        Pausar();
+                        Ui.Pausar();
                         break;
 
                     case "3":
                         LimpiarHistorial();
-                        Pausar();
+                        Ui.Pausar();
                         break;
 
+                    case "0":
                     case "4":
                         salir = true;
                         break;
 
                     default:
-                        Console.WriteLine("\nOpción no válida.");
-                        Pausar();
+                        Ui.Error("Opción no válida.");
+                        Ui.Pausar();
                         break;
                 }
             }
@@ -83,101 +92,65 @@ namespace ProcesosManager
 
         public static void MostrarHistorial()
         {
-            Console.Clear();
-
-            Console.WriteLine("==================================================");
-            Console.WriteLine("              HISTORIAL DE PROCESOS");
-            Console.WriteLine("==================================================");
-            Console.WriteLine();
+            Ui.Titulo("Historial de procesos");
 
             if (historial.Count == 0)
             {
-                Console.WriteLine("No hay acciones registradas.");
+                Ui.Aviso("No hay acciones registradas.");
                 return;
             }
 
+            Ui.EncabezadoTabla($"{"Fecha y hora",-21}{"Acción",-34}Proceso");
+
             foreach (RegistroLog registro in historial)
             {
-                Console.WriteLine(registro);
+                Ui.Escribir($"  {registro.FechaHora:dd/MM/yyyy HH:mm:ss}  ", ConsoleColor.DarkGray);
+                Ui.Escribir($"{registro.Accion,-34}", ConsoleColor.White);
+                Ui.Escribir($"{registro.Proceso}\n", ConsoleColor.Gray);
             }
 
             Console.WriteLine();
-            Console.WriteLine($"Total de registros: {historial.Count}");
+            Ui.Info($"Total de registros: {historial.Count}");
         }
 
         public static void ExportarArchivo()
         {
-            string nombreArchivo = "historial_procesos.txt";
-
             try
             {
-                using (StreamWriter escritor = new StreamWriter(nombreArchivo))
+                var exportacion = new
                 {
-                    escritor.WriteLine("==================================================");
-                    escritor.WriteLine("              HISTORIAL DE PROCESOS");
-                    escritor.WriteLine("==================================================");
-                    escritor.WriteLine();
-                    escritor.WriteLine(
-                        $"Fecha de exportación: {DateTime.Now:dd/MM/yyyy HH:mm:ss}"
-                    );
-                    escritor.WriteLine();
-
-                    if (historial.Count == 0)
+                    fechaExportacion = DateTime.Now,
+                    equipo = Environment.MachineName,
+                    totalRegistros = historial.Count,
+                    registros = historial.Select(r => new
                     {
-                        escritor.WriteLine("No hay acciones registradas.");
-                    }
-                    else
-                    {
-                        foreach (RegistroLog registro in historial)
-                        {
-                            escritor.WriteLine(registro);
-                        }
+                        fechaHora = r.FechaHora,
+                        accion = r.Accion,
+                        proceso = r.Proceso
+                    })
+                };
 
-                        escritor.WriteLine();
-                        escritor.WriteLine(
-                            $"Total de registros: {historial.Count}"
-                        );
-                    }
-                }
+                File.WriteAllText(NombreArchivo, JsonSerializer.Serialize(exportacion, opcionesJson));
 
-                Console.WriteLine();
-                Console.WriteLine("Historial exportado correctamente.");
-                Console.WriteLine($"Archivo: {nombreArchivo}");
+                Ui.Exito($"Historial exportado ({historial.Count} registros).");
+                Ui.Dato("Archivo:", Path.GetFullPath(NombreArchivo));
             }
             catch (Exception ex)
             {
-                Console.WriteLine();
-                Console.WriteLine("Error al exportar el historial.");
-                Console.WriteLine($"Detalle: {ex.Message}");
+                Ui.Error("No se pudo exportar el historial.");
+                Ui.Dato("Detalle:", ex.Message);
             }
         }
 
         public static void LimpiarHistorial()
         {
             historial.Clear();
-
-            Console.WriteLine();
-            Console.WriteLine("Historial limpiado correctamente.");
+            Ui.Exito("Historial limpiado correctamente.");
         }
 
         public static List<RegistroLog> ObtenerHistorial()
         {
             return new List<RegistroLog>(historial);
-        }
-
-        private static void Pausar()
-        {
-            Console.WriteLine();
-            Console.WriteLine("Presione cualquier tecla para continuar...");
-
-            try
-            {
-                Console.ReadKey(true);
-            }
-            catch
-            {
-                Console.ReadLine();
-            }
         }
     }
 }

@@ -20,8 +20,9 @@ La autoría y aportes de cada integrante se pueden verificar en la tabla anterio
 1. **Listar procesos** — PID, nombre y memoria de cada proceso activo.
 2. **Gestionar procesos** — iniciar un programa por nombre o finalizar un proceso por PID (con confirmación).
 3. **Monitor de métricas** — consumo de CPU y memoria: tabla única, tiempo real (top 15) o por PID.
-4. **Exportar logs** — historial de acciones y métricas a un archivo.
-5. **Salir**
+4. **Exportar logs** — historial de acciones exportado a `historial_procesos.json`.
+
+`0` **Salir**
 
 ## Requisitos
 
@@ -58,6 +59,18 @@ dotnet run
 sudo dotnet run
 ```
 
+## Instalación en Windows (un clic)
+
+1. Descomprimir el `.zip`.
+2. Doble clic en **`Instalar.bat`**.
+
+El instalador:
+- instala .NET 10 SDK si no está (vía `winget`, o con el script oficial de Microsoft si no hay `winget`);
+- compila la app como un único `.exe` en `%LOCALAPPDATA%\ProcesosManager`;
+- crea accesos directos en el Escritorio y en el menú Inicio.
+
+Para quitarla: **`Desinstalar.bat`**. El historial exportado (`historial_procesos.json`) queda en la carpeta de instalación.
+
 ## Ejecución en Windows
 
 1. **Método rápido (un solo clic):**
@@ -76,6 +89,7 @@ sudo dotnet run
 ProcesosManager.slnx
 ProcesosManager/
 ├── Program.cs             # Menú principal (Integrante 1)
+├── Ui.cs                  # Helpers visuales compartidos (colores, títulos, mensajes)
 ├── ListarProcesos.cs      # Opción 1 (Integrante 2)
 ├── GestionarProcesos.cs   # Opción 2 (Integrante 3)
 ├── MonitorMtricas.cs      # Opción 3 (Integrante 4)

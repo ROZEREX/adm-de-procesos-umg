@@ -16,25 +16,25 @@ namespace ProcesosManager
             }
             catch { }
 
+            try
+            {
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+            }
+            catch { }
+
             bool salir = false;
 
             while (!salir)
             {
-                SafeClear();
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("==================================================");
-                Console.WriteLine("             ADMINISTRADOR DE PROCESOS            ");
-                Console.WriteLine("==================================================");
-                Console.ResetColor();
-                Console.WriteLine(" 1. Listar Procesos");
-                Console.WriteLine(" 2. Gestionar Procesos (Matar / Iniciar)");
-                Console.WriteLine(" 3. Monitor de Métricas (Consumo CPU / Memoria)");
-                Console.WriteLine(" 4. Exportar Logs (Historial / Exportar a archivo)");
-                Console.WriteLine(" 5. Salir");
-                Console.WriteLine("──────────────────────────────────────────────────");
-                Console.Write(" Seleccione una opción: ");
+                Ui.Titulo("Administrador de Procesos", $"{Environment.MachineName} · {DateTime.Now:dd/MM/yyyy HH:mm}");
+                Ui.Opcion("1", "Listar procesos");
+                Ui.Opcion("2", "Gestionar procesos", "iniciar / finalizar");
+                Ui.Opcion("3", "Monitor de métricas", "CPU / memoria");
+                Ui.Opcion("4", "Historial y exportación", "JSON");
+                Console.WriteLine();
+                Ui.Opcion("0", "Salir");
 
-                string? opcion = Console.ReadLine()?.Trim();
+                string? opcion = Ui.Pedir("Seleccione una opción");
 
                 switch (opcion)
                 {
@@ -52,15 +52,14 @@ namespace ProcesosManager
                     case "4":
                         EjecutarExportarLogs();
                         break;
+                    case "0":
                     case "5":
                         salir = true;
-                        Console.WriteLine("\nSaliendo del programa...");
+                        Ui.Info("Saliendo del programa...");
                         break;
                     default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("\nOpción no válida. Ingrese un número del 1 al 5.");
-                        Console.ResetColor();
-                        Pausar();
+                        Ui.Error("Opción no válida. Ingrese un número del 0 al 4.");
+                        Ui.Pausar();
                         break;
                 }
             }
@@ -75,8 +74,8 @@ namespace ProcesosManager
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\nError al listar procesos: {ex.Message}");
-                Pausar();
+                Ui.Error($"Error al listar procesos: {ex.Message}");
+                Ui.Pausar();
             }
         }
 
@@ -89,8 +88,8 @@ namespace ProcesosManager
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\nError al gestionar procesos: {ex.Message}");
-                Pausar();
+                Ui.Error($"Error al gestionar procesos: {ex.Message}");
+                Ui.Pausar();
             }
         }
 
@@ -103,8 +102,8 @@ namespace ProcesosManager
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\nError en monitor de métricas: {ex.Message}");
-                Pausar();
+                Ui.Error($"Error en monitor de métricas: {ex.Message}");
+                Ui.Pausar();
             }
         }
 
@@ -117,34 +116,9 @@ namespace ProcesosManager
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\nError al exportar logs: {ex.Message}");
-                Pausar();
+                Ui.Error($"Error al exportar logs: {ex.Message}");
+                Ui.Pausar();
             }
-        }
-
-        private static void SafeClear()
-        {
-            try
-            {
-                if (!Console.IsOutputRedirected)
-                {
-                    Console.Clear();
-                }
-            }
-            catch { }
-        }
-
-        private static void Pausar()
-        {
-            Console.WriteLine("\nPresione cualquier tecla para continuar...");
-            try
-            {
-                if (!Console.IsInputRedirected)
-                {
-                    Console.ReadKey(true);
-                }
-            }
-            catch { }
         }
     }
 }

@@ -17,21 +17,20 @@ namespace ProcesosManager
 
             while (!salir)
             {
-                Console.Clear();
-                Console.WriteLine("===== MONITOR DE MÉTRICAS =====");
-                Console.WriteLine("1. Ver tabla de consumo (CPU / Memoria) - una sola vez");
-                Console.WriteLine("2. Monitoreo en tiempo real (auto-refresh)");
-                Console.WriteLine("3. Monitorear un proceso específico por PID");
-                Console.WriteLine("4. Volver al menú principal");
-                Console.Write("Seleccione una opción: ");
+                Ui.Titulo("Monitor de métricas", $"{NucleosCPU} núcleos lógicos");
+                Ui.Opcion("1", "Tabla de consumo", "CPU / memoria, una sola vez");
+                Ui.Opcion("2", "Monitoreo en tiempo real", "auto-refresh");
+                Ui.Opcion("3", "Monitorear un proceso", "por PID");
+                Console.WriteLine();
+                Ui.Opcion("0", "Volver al menú principal");
 
-                string opcion = Console.ReadLine();
+                string? opcion = Ui.Pedir("Seleccione una opción");
 
                 switch (opcion)
                 {
                     case "1":
                         MostrarTablaMetricas();
-                        Pausar();
+                        Ui.Pausar();
                         break;
                     case "2":
                         MonitorearEnTiempoReal();
@@ -39,12 +38,13 @@ namespace ProcesosManager
                     case "3":
                         MonitorearProcesoPorPid();
                         break;
+                    case "0":
                     case "4":
                         salir = true;
                         break;
                     default:
-                        Console.WriteLine("Opción inválida.");
-                        Pausar();
+                        Ui.Error("Opción inválida.");
+                        Ui.Pausar();
                         break;
                 }
             }
@@ -52,43 +52,27 @@ namespace ProcesosManager
 
         public static void MostrarTablaMetricas()
         {
-            Console.Clear();
-            Console.WriteLine("Calculando uso de CPU (esto toma ~1 segundo)...\n");
+            Ui.Titulo("Consumo de procesos");
+            Ui.Info("Calculando uso de CPU (esto toma ~1 segundo)...");
 
             var metricas = ObtenerMetricasDeTodosLosProcesos(intervaloMs: 500);
 
-            Console.WriteLine($"{"PID",-8}{"Proceso",-30}{"CPU %",-10}{"Memoria (MB)",-15}");
-            Console.WriteLine(new string('-', 63));
-
-            foreach (var m in metricas.OrderByDescending(m => m.MemoriaMB))
-            {
-                Console.WriteLine($"{m.Pid,-8}{Truncar(m.Nombre, 28),-30}{m.CpuPorcentaje,-10:F1}{m.MemoriaMB,-15:F1}");
-            }
-
-            Console.WriteLine($"\nTotal de procesos: {metricas.Count}");
+            Ui.Titulo("Consumo de procesos", $"{metricas.Count} procesos · ordenado por memoria");
+            ImprimirTabla(metricas.OrderByDescending(m => m.MemoriaMB));
         }
 
         public static void MonitorearEnTiempoReal()
         {
-            Console.Clear();
-            Console.WriteLine("Monitoreo en tiempo real. Presione cualquier tecla para detener...\n");
+            Ui.Titulo("Monitoreo en tiempo real");
+            Ui.Info("Presione cualquier tecla para detener...");
             Thread.Sleep(1000);
 
             while (!Console.KeyAvailable)
             {
                 var metricas = ObtenerMetricasDeTodosLosProcesos(intervaloMs: 500);
 
-                Console.Clear();
-                Console.WriteLine("===== MONITOREO EN TIEMPO REAL (Ctrl+C o tecla para salir) =====\n");
-                Console.WriteLine($"{"PID",-8}{"Proceso",-30}{"CPU %",-10}{"Memoria (MB)",-15}");
-                Console.WriteLine(new string('-', 63));
-
-                foreach (var m in metricas.OrderByDescending(x => x.CpuPorcentaje).Take(15))
-                {
-                    Console.WriteLine($"{m.Pid,-8}{Truncar(m.Nombre, 28),-30}{m.CpuPorcentaje,-10:F1}{m.MemoriaMB,-15:F1}");
-                }
-
-                Console.WriteLine("\n(Mostrando los 15 procesos con mayor uso de CPU)");
+                Ui.Titulo("Monitoreo en tiempo real", $"Top 15 por CPU · {DateTime.Now:HH:mm:ss} · tecla para salir");
+                ImprimirTabla(metricas.OrderByDescending(x => x.CpuPorcentaje).Take(15));
             }
 
             Console.ReadKey(true); // consume la tecla que detuvo el bucle
@@ -96,38 +80,58 @@ namespace ProcesosManager
 
         public static void MonitorearProcesoPorPid()
         {
-            Console.Clear();
-            Console.Write("Ingrese el PID del proceso a monitorear: ");
-            if (!int.TryParse(Console.ReadLine(), out int pid))
+            Ui.Titulo("Monitorear proceso");
+
+            if (!int.TryParse(Ui.Pedir("PID del proceso a monitorear"), out int pid))
             {
-                Console.WriteLine("PID inválido.");
-                Pausar();
+                Ui.Error("PID inválido.");
+                Ui.Pausar();
                 return;
             }
 
             try
             {
                 using Process proceso = Process.GetProcessById(pid);
-                Console.WriteLine($"\nMonitoreando '{proceso.ProcessName}' (PID {pid}). Calculando...");
+                Console.WriteLine();
+                Ui.Info($"Monitoreando '{proceso.ProcessName}' (PID {pid}). Calculando...");
 
                 double cpu = ObtenerUsoCPU(proceso, intervaloMs: 1000);
                 double memoriaMB = proceso.WorkingSet64 / (1024.0 * 1024.0);
 
-                Console.WriteLine($"\nProceso : {proceso.ProcessName}");
-                Console.WriteLine($"PID     : {proceso.Id}");
-                Console.WriteLine($"CPU %   : {cpu:F1}");
-                Console.WriteLine($"Memoria : {memoriaMB:F1} MB");
+                Console.WriteLine();
+                Ui.Dato("Proceso:", proceso.ProcessName);
+                Ui.Dato("PID:", proceso.Id.ToString());
+                Ui.Escribir($"  {"CPU:",-10}", ConsoleColor.DarkGray);
+                Ui.Escribir($"{cpu:F1} %\n", Ui.ColorNivel(cpu, 10, 50));
+                Ui.Escribir($"  {"Memoria:",-10}", ConsoleColor.DarkGray);
+                Ui.Escribir($"{memoriaMB:F1} MB\n", Ui.ColorNivel(memoriaMB, 300, 1000));
             }
             catch (ArgumentException)
             {
-                Console.WriteLine("No existe ningún proceso activo con ese PID.");
+                Ui.Error("No existe ningún proceso activo con ese PID.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"No se pudo obtener el acceso al proceso: {ex.Message}");
+                Ui.Error($"No se pudo obtener el acceso al proceso: {ex.Message}");
             }
 
-            Pausar();
+            Ui.Pausar();
+        }
+
+        private static void ImprimirTabla(IEnumerable<MetricaProceso> metricas)
+        {
+            Ui.EncabezadoTabla($"{"PID",-8}{"Proceso",-30}{"CPU %",8}{"Memoria (MB)",15}");
+
+            foreach (var m in metricas)
+            {
+                Ui.Escribir($"  {m.Pid,-8}", ConsoleColor.DarkGray);
+                Ui.Escribir($"{Truncar(m.Nombre, 28),-30}", ConsoleColor.Gray);
+                Ui.Escribir($"{m.CpuPorcentaje,8:F1}", Ui.ColorNivel(m.CpuPorcentaje, 10, 50));
+                Ui.Escribir($"{m.MemoriaMB,15:F1}\n", Ui.ColorNivel(m.MemoriaMB, 300, 1000));
+            }
+
+            Console.WriteLine();
+            Ui.Info("Amarillo: consumo medio   Rojo: consumo alto");
         }
 
         public static double ObtenerUsoCPU(Process proceso, int intervaloMs = 500)
@@ -215,18 +219,12 @@ namespace ProcesosManager
             if (string.IsNullOrEmpty(texto)) return texto;
             return texto.Length <= maxLargo ? texto : texto.Substring(0, maxLargo - 1) + "…";
         }
-
-        private static void Pausar()
-        {
-            Console.WriteLine("\nPresione una tecla para continuar...");
-            Console.ReadKey(true);
-        }
     }
 
     public class MetricaProceso
     {
         public int Pid { get; set; }
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = "";
         public double CpuPorcentaje { get; set; }
         public double MemoriaMB { get; set; }
     }

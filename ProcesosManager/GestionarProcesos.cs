@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using ProcesosManager;
 
 namespace ProcesoManager
 {
@@ -7,58 +8,50 @@ namespace ProcesoManager
     {
         public static void Gestionar()
         {
-            int opcion;
+            bool salir = false;
 
-            do
+            while (!salir)
             {
-                Console.Clear();
+                Ui.Titulo("Gestionar procesos");
+                Ui.Opcion("1", "Iniciar proceso");
+                Ui.Opcion("2", "Matar proceso", "por PID");
+                Console.WriteLine();
+                Ui.Opcion("0", "Volver");
 
-                Console.WriteLine("=== GESTIONAR PROCESOS ===");
-                Console.WriteLine("1. Iniciar proceso");
-                Console.WriteLine("2. Matar proceso");
-                Console.WriteLine("3. Volver");
-                Console.WriteLine("===========================");
-                Console.Write("Seleccione una opcion: ");
-
-                if (!int.TryParse(Console.ReadLine(), out opcion))
-                {
-                    opcion = 0;
-                }
+                string? opcion = Ui.Pedir("Seleccione una opción");
 
                 switch (opcion)
                 {
-                    case 1:
+                    case "1":
                         IniciarProceso();
                         break;
 
-                    case 2:
+                    case "2":
                         MatarProceso();
                         break;
 
-                    case 3:
+                    case "0":
+                    case "3":
+                        salir = true;
                         break;
 
                     default:
-                        Console.WriteLine("Opcion no valida.");
-                        Console.ReadKey();
+                        Ui.Error("Opción no válida.");
+                        Ui.Pausar();
                         break;
                 }
-
-            } while (opcion != 3);
+            }
         }
 
         public static void IniciarProceso()
         {
-            Console.Clear();
+            Ui.Titulo("Iniciar proceso", "Nombre o ruta del programa (ej: notepad, calc, chrome)");
 
-            Console.WriteLine("=== INICIAR PROCESO ===");
-            Console.Write("Ingrese el nombre o ruta del programa (ej: notepad, calc, chrome): ");
-
-            string nombre = Console.ReadLine()?.Trim();
+            string? nombre = Ui.Pedir("Programa");
 
             if (string.IsNullOrWhiteSpace(nombre))
             {
-                Console.WriteLine("El nombre no puede estar vacío.");
+                Ui.Aviso("El nombre no puede estar vacío.");
             }
             else
             {
@@ -72,44 +65,36 @@ namespace ProcesoManager
                     };
 
                     Process.Start(psi);
-                    
-                    // Si tienes el método de Logs disponible:
-                    // ProcesosManager.ExportarLogs.Registrar("Proceso iniciado", nombre);
 
-                    Console.WriteLine();
-                    Console.WriteLine("Proceso iniciado correctamente.");
+                    ExportarLogs.Registrar("Proceso iniciado", nombre);
+
+                    Ui.Exito($"Proceso '{nombre}' iniciado correctamente.");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("No se pudo iniciar el proceso.");
-                    Console.WriteLine($"Detalle del error: {ex.Message}");
+                    Ui.Error("No se pudo iniciar el proceso.");
+                    Ui.Dato("Detalle:", ex.Message);
                 }
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Presiona una tecla para volver...");
-            Console.ReadKey();
+            Ui.Pausar();
         }
 
         public static void MatarProceso()
         {
-            Console.Clear();
+            Ui.Titulo("Matar proceso");
 
-            Console.WriteLine("=== MATAR PROCESO ===");
-            Console.Write("Ingrese el PID del proceso: ");
-
-            if (int.TryParse(Console.ReadLine(), out int pid))
+            if (int.TryParse(Ui.Pedir("PID del proceso"), out int pid))
             {
                 try
                 {
                     Process proceso = Process.GetProcessById(pid);
 
                     Console.WriteLine();
-                    Console.WriteLine("Proceso encontrado: " + proceso.ProcessName);
-                    Console.Write("¿Desea finalizarlo? (S/N): ");
+                    Ui.Dato("Proceso:", proceso.ProcessName);
+                    Ui.Dato("PID:", pid.ToString());
 
-                    string respuesta = Console.ReadLine()?.Trim();
+                    string? respuesta = Ui.Pedir("¿Desea finalizarlo? (S/N)");
 
                     if (respuesta?.Equals("S", StringComparison.OrdinalIgnoreCase) == true)
                     {
@@ -118,40 +103,32 @@ namespace ProcesoManager
                         // Se utiliza 'entireProcessTree: true' para matar el proceso y sus subprocesos
                         proceso.Kill(entireProcessTree: true);
 
-                        // Si tienes el método de Logs disponible:
-                        // ProcesosManager.ExportarLogs.Registrar("Proceso finalizado", $"{nombreProceso} (PID {pid})");
+                        ExportarLogs.Registrar("Proceso finalizado", $"{nombreProceso} (PID {pid})");
 
-                        Console.WriteLine();
-                        Console.WriteLine("Proceso finalizado correctamente.");
+                        Ui.Exito("Proceso finalizado correctamente.");
                     }
                     else
                     {
-                        Console.WriteLine();
-                        Console.WriteLine("Operacion cancelada.");
+                        Ui.Aviso("Operación cancelada.");
                     }
                 }
                 catch (ArgumentException)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("No existe un proceso activo con ese PID.");
+                    Ui.Error("No existe un proceso activo con ese PID.");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("No se pudo finalizar el proceso.");
-                    Console.WriteLine($"Detalle del error: {ex.Message}");
-                    Console.WriteLine("Asegúrese de ejecutar la aplicación como Administrador.");
+                    Ui.Error("No se pudo finalizar el proceso.");
+                    Ui.Dato("Detalle:", ex.Message);
+                    Ui.Info("Asegúrese de ejecutar la aplicación como Administrador.");
                 }
             }
             else
             {
-                Console.WriteLine();
-                Console.WriteLine("El PID ingresado no es valido.");
+                Ui.Error("El PID ingresado no es válido.");
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Presiona una tecla para volver...");
-            Console.ReadKey();
+            Ui.Pausar();
         }
     }
 }
